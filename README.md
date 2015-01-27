@@ -18,7 +18,7 @@ npm test
 ## Usage
 
 ```js
-var announcement = require('announcement');
+var Announcement = require('announcement');
 ```
 
 ## API
