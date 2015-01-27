@@ -22,6 +22,50 @@ var announcement = require('announcement');
 ```
 
 ## API
+### [Announcement](index.js#L26)
+
+Main entry point of Announcement event emitter/aggregator
+
+```js
+var Announcement = require('announcement');
+var announcement = new Announcment();
+```
+
+### [.on](index.js#L55)
+
+Register a listener for an event.
+
+* `event` **{String|Function}**: Event type to listen for.    
+* `cb` **{Function}**: Callback invoked when `event` type is emitted.    
+* `returns` **{Function}**: Original callback function or handler function to use to remove listener.  
+
+```js
+announcement.on('foo', function (data) {
+  // do something with data
+});
+
+var FooEvent = function () {};
+announcement.on(FooEvent, function (data) {
+  // data will be an instance of FooEvent
+  // do something with data
+});
+```
+
+### [.emit](index.js#L83)
+
+Asynchronously emit an event and additional data.
+
+* `event` **{String|Object}**: Event type to emit.    
+
+```js
+// emit string event
+announcement.emit('foo', { bar: 'baz' });
+
+// emit typed event
+var foo = new FooEvent();
+foo.bar = 'baz';
+announcement.emit(foo);
+```
 
 
 ## Contributing
