@@ -29,5 +29,8 @@
     "mocha": "*",
     "should": "*"
   },
-  "keywords": []
+  "keywords": [],
+  "dependencies": {
+    "array-slice": "^0.2.2"
+  }
 }
