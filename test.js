@@ -30,10 +30,13 @@ describe('announcement', function () {
     announcement.on('user-registered', function () { counter++; });
     announcement.emit('user-registered');
     announcement.emit('user-registered');
-    process.nextTick(function () {
+    function check () {
+      if (announcement.pending)
+        return process.nextTick(check);
       assert.equal(counter, 2);
       done();
-    });
+    }
+    process.nextTick(check);
   });
 
   it('should emit object events', function (done) {
@@ -52,10 +55,13 @@ describe('announcement', function () {
     });
     announcement.emit(userRegCmd);
     announcement.emit(userRegCmd);
-    process.nextTick(function () {
+    function check () {
+      if (announcement.pending)
+        return process.nextTick(check);
       assert.equal(userRegCmd.count(), 2);
       done();
-    });
+    }
+    process.nextTick(check);
   });
 
   it('should remove registered event listeners', function () {
@@ -85,5 +91,44 @@ describe('announcement', function () {
       done();
     });
     announcement.emit('user-registered', { username: 'doowb' });
+  });
+
+  it('should remove a listener when `once` is used.', function (done) {
+    var counter = 0;
+    announcement.once('user-registered', function () { counter++; });
+    announcement.emit('user-registered');
+    announcement.emit('user-registered');
+    function check () {
+      if (announcement.pending)
+        return process.nextTick(check);
+      assert.equal(counter, 1);
+      done();
+    }
+    process.nextTick(check);
+  });
+
+  it('should remove a command handler when `once` is used.', function (done) {
+    var UserRegistrationCommand = function () {
+      var counter = 0;
+      this.inc = function () {
+        counter++;
+      };
+      this.count = function () {
+        return counter;
+      }
+    };
+    var userRegCmd = new UserRegistrationCommand();
+    announcement.once(UserRegistrationCommand, function (cmd) {
+      cmd.inc();
+    });
+    announcement.emit(userRegCmd);
+    announcement.emit(userRegCmd);
+    function check () {
+      if (announcement.pending)
+        return process.nextTick(check);
+      assert.equal(userRegCmd.count(), 1);
+      done();
+    }
+    process.nextTick(check);
   });
 });

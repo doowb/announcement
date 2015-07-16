@@ -9,6 +9,7 @@
 
 var async = require('async');
 var slice = require('array-slice');
+var each = require('./lib/async-each');
 var CommandHandler = require('./lib/command-handler');
 
 module.exports = Announcement;
@@ -108,6 +109,22 @@ Announcement.prototype.off = function(eventOrCommand, cb) {
   return this.handlers.delete(eventOrCommand);
 };
 
+Announcement.prototype.once = function(eventOrCommand, cb) {
+  if (typeof eventOrCommand === 'string') {
+    var listener = this.on(eventOrCommand, function () {
+      this.off(eventOrCommand, listener);
+      cb.apply(this, arguments);
+    });
+    return listener;
+  }
+  var self = this;
+  var cmdHandler = this.on(eventOrCommand, function (msg) {
+    self.off(cmdHandler);
+    cb(msg);
+  });
+  return cmdHandler;
+};
+
 /**
  * Asynchronously emit an eventOrCommand and additional data.
  *
@@ -126,23 +143,35 @@ Announcement.prototype.off = function(eventOrCommand, cb) {
  */
 
 Announcement.prototype.emit = function(eventOrCommand) {
+  var self = this;
   var args = slice(arguments, 1);
+  if (this.pending) {
+    return process.nextTick(function () {
+      self.emit.apply(self, [eventOrCommand].concat(args));
+    });
+  }
   if (typeof eventOrCommand === 'string') {
     var listeners = this.events[eventOrCommand];
-    if (listeners) {
-      var self = this;
+    if (listeners && listeners.length) {
+      this.pending = true;
       async.each(listeners, function (listener, next) {
         process.nextTick(function () {
           listener.apply(self, args);
           next();
         });
+      }, function () {
+        self.pending = false;
       });
     }
   } else {
-    for (var handler of this.handlers) {
+    this.pending = true;
+    each(this.handlers.values(), function (handler, next) {
       process.nextTick(function () {
         handler.handle(eventOrCommand);
+        next();
       });
-    }
+    }, function () {
+      self.pending = false;
+    });
   }
 };
