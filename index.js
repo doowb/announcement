@@ -48,7 +48,7 @@ function Announcement () {
  * });
  * ```
  *
- * @param  {String|Function} `eventOrCommand` Event type to listen for.
+ * @param  {String|Function} `eventOrCommand` Event string or instance of a Command to listen for.
  * @param  {Function} `cb` Callback invoked when `eventOrCommand` type is emitted.
  * @return {Function} Original callback function or handler function to use to remove listener.
  * @api public
@@ -108,6 +108,27 @@ Announcement.prototype.off = function(eventOrCommand, cb) {
   }
   return this.handlers.delete(eventOrCommand);
 };
+
+/**
+ * Register a listener for an event or a command that will only execute once.
+ *
+ * ```js
+ * announcement.once('user-registration', function (user) {
+ *   // do something with user
+ * });
+ *
+ * var UserRegistrationCommand = function () {};
+ * announcement.once(UserRegistrationCommand, function (userRegCmd) {
+ *   // userRegCmd will be an instance of UserRegistrationCommand
+ *   // do something with userRegCmd
+ * });
+ * ```
+ *
+ * @param  {String|Function} `eventOrCommand` Event string or instance of a Command to listen for.
+ * @param  {Function} `cb` Callback invoked when `eventOrCommand` type is emitted.
+ * @return {Function} Original callback function or handler function to use to remove listener.
+ * @api public
+ */
 
 Announcement.prototype.once = function(eventOrCommand, cb) {
   if (typeof eventOrCommand === 'string') {
