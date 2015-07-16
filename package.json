@@ -30,7 +30,8 @@
     "test": "mocha"
   },
   "dependencies": {
-    "array-slice": "^0.2.2"
+    "array-slice": "^0.2.2",
+    "async": "^1.3.0"
   },
   "devDependencies": {
     "mocha": "*",

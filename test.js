@@ -20,9 +20,9 @@ describe('announcement', function () {
   it('should register handlers', function () {
     var UserRegistrationCommand = function () {};
     announcement.on(UserRegistrationCommand, function () {});
-    assert(Array.isArray(announcement.handlers), 'Expected handlers to be an Array');
-    assert(announcement.handlers.length === 1, 'Expected handlers.length to be 1');
-    assert(announcement.handlers[0] instanceof CommandHandler, 'Expected handlers[0] to be an instanceof CommandHandler');
+    assert(announcement.handlers instanceof Set, 'Expected handlers to be a Set');
+    assert(announcement.handlers.size === 1, 'Expected handlers.size to be 1');
+    assert(announcement.handlers.values().next().value instanceof CommandHandler, 'Expected handlers[0] to be an instanceof CommandHandler');
   });
 
   it('should emit events', function (done) {
@@ -58,4 +58,25 @@ describe('announcement', function () {
     });
   });
 
+  it('should remove registered event listeners', function () {
+    var listener = announcement.on('user-registered', function () {});
+    assert(Array.isArray(announcement.events['user-registered']), 'Expected user-registered to be an Array');
+    assert(announcement.events['user-registered'].length === 1, 'Expected user-registered.length to be 1');
+    assert(typeof announcement.events['user-registered'][0] === 'function', 'Expected user-registered[0] to be a function');
+
+    announcement.off('user-registered', listener);
+    assert.equal(announcement.events['user-registered'].length, 0);
+  });
+
+  it('should remove registered command handlers', function () {
+    var UserRegistrationCommand = function () {};
+    var cmdHandler = announcement.on(UserRegistrationCommand, function () {});
+    assert(announcement.handlers instanceof Set, 'Expected handlers to be a Set');
+    assert(announcement.handlers.size === 1, 'Expected handlers.size to be 1');
+    assert(announcement.handlers.values().next().value instanceof CommandHandler, 'Expected handlers[0] to be an instanceof CommandHandler');
+
+    announcement.off(cmdHandler);
+    assert(announcement.handlers.size === 0, 'Expected handlers.size to be 1');
+
+  });
 });

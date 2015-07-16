@@ -7,6 +7,7 @@
 
 'use strict';
 
+var async = require('async');
 var slice = require('array-slice');
 var CommandHandler = require('./lib/command-handler');
 
@@ -28,7 +29,7 @@ function Announcement () {
     return new Announcement();
   }
   this.events = {};
-  this.handlers = [];
+  this.handlers = new Set();
 }
 
 /**
@@ -59,8 +60,52 @@ Announcement.prototype.on = function(eventOrCommand, cb) {
     return cb;
   }
   var commandHandler = new CommandHandler(eventOrCommand, cb);
-  this.handlers.push(commandHandler);
+  this.handlers.add(commandHandler);
   return commandHandler;
+};
+
+/**
+ * Removes a registered listener or CommandHandler
+ * The listener `cb` or the CommandHandler instance need to be the one
+ * returned from the `on` method.
+ *
+ * ```js
+ * // register listener
+ * var listener = announcement.on('user-registration', function (user) {
+ *   console.log(user);
+ * });
+ * // emit user-registration and see output from listener
+ * announcement.emit('user-registration', { username: 'doowb' });
+ * //=> { username: 'doowb' }
+ *
+ * // remove listener
+ * announcement.off('user-registration', listener);
+ * // emit user-registration and nothing is output
+ * announcement.emit('user-registration', { username: 'doowb' });
+ * ```
+ *
+ * @param  {String|Function} `eventOrCommand` Event string or instance of a CommandHandler to turn off.
+ * @param  {Function} `cb` Listener function that will be removed.
+ * @return {Boolean} `true` if the listener existed before being removed.
+ * @api public
+ */
+
+Announcement.prototype.off = function(eventOrCommand, cb) {
+  if (typeof eventOrCommand === 'string') {
+    var listeners = this.events[eventOrCommand];
+    if (!listeners || listeners.length === 0) {
+      return false;
+    }
+
+    var i = listeners.indexOf(cb);
+    if (i === -1) {
+      return false;
+    }
+
+    listeners.splice(i, 1);
+    return true;
+  }
+  return this.handlers.delete(eventOrCommand);
 };
 
 /**
@@ -85,21 +130,17 @@ Announcement.prototype.emit = function(eventOrCommand) {
   if (typeof eventOrCommand === 'string') {
     var listeners = this.events[eventOrCommand];
     if (listeners) {
-      var len = listeners.length;
-      var i = 0;
-      while (len--) {
+      async.each(listeners, function (listener, next) {
         process.nextTick(function () {
-          listeners[i++].apply(null, args);
+          listener.apply(null, args);
+          next();
         });
-      }
+      });
     }
   } else {
-    var handlers = this.handlers;
-    var len = handlers.length;
-    var i = 0;
-    while (len--) {
+    for (var handler of this.handlers) {
       process.nextTick(function () {
-        handlers[i++].handle(eventOrCommand);
+        handler.handle(eventOrCommand);
       });
     }
   }
