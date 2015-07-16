@@ -8,12 +8,12 @@
 'use strict';
 
 var slice = require('array-slice');
-var Handler = require('./lib/handler');
+var CommandHandler = require('./lib/command-handler');
 
 module.exports = Announcement;
 
 /**
- * Main entry point of Announcement event emitter/aggregator
+ * Main entry point of Announcement eventOrCommand emitter/aggregator
  *
  * ```js
  * var Announcement = require('announcement');
@@ -32,58 +32,58 @@ function Announcement () {
 }
 
 /**
- * Register a listener for an event.
+ * Register a listener for an eventOrCommand.
  *
  * ```js
- * announcement.on('foo', function (data) {
- *   // do something with data
+ * announcement.on('user-registration', function (user) {
+ *   // do something with user
  * });
  *
- * var FooEvent = function () {};
- * announcement.on(FooEvent, function (data) {
- *   // data will be an instance of FooEvent
- *   // do something with data
+ * var UserRegistrationCommand = function () {};
+ * announcement.on(UserRegistrationCommand, function (userRegCmd) {
+ *   // userRegCmd will be an instance of UserRegistrationCommand
+ *   // do something with userRegCmd
  * });
  * ```
  *
- * @param  {String|Function} `event` Event type to listen for.
- * @param  {Function} `cb` Callback invoked when `event` type is emitted.
+ * @param  {String|Function} `eventOrCommand` Event type to listen for.
+ * @param  {Function} `cb` Callback invoked when `eventOrCommand` type is emitted.
  * @return {Function} Original callback function or handler function to use to remove listener.
  * @api public
  */
 
-Announcement.prototype.on = function(event, cb) {
-  if (typeof event === 'string') {
-    var listeners = this.events[event] || (this.events[event] = []);
+Announcement.prototype.on = function(eventOrCommand, cb) {
+  if (typeof eventOrCommand === 'string') {
+    var listeners = this.events[eventOrCommand] || (this.events[eventOrCommand] = []);
     listeners.push(cb);
     return cb;
   }
-  var handler = new Handler(event, cb);
-  this.handlers.push(handler);
-  return handler;
+  var commandHandler = new CommandHandler(eventOrCommand, cb);
+  this.handlers.push(commandHandler);
+  return commandHandler;
 };
 
 /**
- * Asynchronously emit an event and additional data.
+ * Asynchronously emit an eventOrCommand and additional data.
  *
  * ```js
  * // emit string event
- * announcement.emit('foo', { bar: 'baz' });
+ * announcement.emit('user-registered', { username: 'doowb' });
  *
- * // emit typed event
- * var foo = new FooEvent();
- * foo.bar = 'baz';
- * announcement.emit(foo);
+ * // emit typed Command
+ * var userRegCmd = new UserRegistrationCommand();
+ * userRegCmd.user = { username: 'doowb' };
+ * announcement.emit(userRegCmd);
  * ```
  *
- * @param  {String|Object} `event` Event type to emit.
+ * @param  {String|Object} `eventOrCommand` Event string or instance of a Command to emit.
  * @api public
  */
 
-Announcement.prototype.emit = function(event) {
+Announcement.prototype.emit = function(eventOrCommand) {
   var args = slice(arguments, 1);
-  if (typeof event === 'string') {
-    var listeners = this.events[event];
+  if (typeof eventOrCommand === 'string') {
+    var listeners = this.events[eventOrCommand];
     if (listeners) {
       var len = listeners.length;
       var i = 0;
@@ -99,7 +99,7 @@ Announcement.prototype.emit = function(event) {
     var i = 0;
     while (len--) {
       process.nextTick(function () {
-        handlers[i++].handle(event);
+        handlers[i++].handle(eventOrCommand);
       });
     }
   }

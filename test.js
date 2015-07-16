@@ -2,7 +2,7 @@
 
 var assert = require('assert');
 var Announcement = require('./');
-var Handler = require('./lib/handler');
+var CommandHandler = require('./lib/command-handler');
 
 describe('announcement', function () {
   var announcement = null;
@@ -11,25 +11,25 @@ describe('announcement', function () {
   });
 
   it('should register events', function () {
-    announcement.on('foo', function () {});
-    assert(Array.isArray(announcement.events.foo), 'Expected foo to be an Array');
-    assert(announcement.events.foo.length === 1, 'Expected foo.length to be 1');
-    assert(typeof announcement.events.foo[0] === 'function', 'Expected foo[0] to be a function');
+    announcement.on('user-registered', function () {});
+    assert(Array.isArray(announcement.events['user-registered']), 'Expected user-registered to be an Array');
+    assert(announcement.events['user-registered'].length === 1, 'Expected user-registered.length to be 1');
+    assert(typeof announcement.events['user-registered'][0] === 'function', 'Expected user-registered[0] to be a function');
   });
 
   it('should register handlers', function () {
-    var FooEvent = function () {};
-    announcement.on(FooEvent, function () {});
+    var UserRegistrationCommand = function () {};
+    announcement.on(UserRegistrationCommand, function () {});
     assert(Array.isArray(announcement.handlers), 'Expected handlers to be an Array');
     assert(announcement.handlers.length === 1, 'Expected handlers.length to be 1');
-    assert(announcement.handlers[0] instanceof Handler, 'Expected handlers[0] to be an instanceof Handler');
+    assert(announcement.handlers[0] instanceof CommandHandler, 'Expected handlers[0] to be an instanceof CommandHandler');
   });
 
   it('should emit events', function (done) {
     var counter = 0;
-    announcement.on('foo', function () { counter++; });
-    announcement.emit('foo');
-    announcement.emit('foo');
+    announcement.on('user-registered', function () { counter++; });
+    announcement.emit('user-registered');
+    announcement.emit('user-registered');
     process.nextTick(function () {
       assert.equal(counter, 2);
       done();
@@ -37,7 +37,7 @@ describe('announcement', function () {
   });
 
   it('should emit object events', function (done) {
-    var FooEvent = function () {
+    var UserRegistrationCommand = function () {
       var counter = 0;
       this.inc = function () {
         counter++;
@@ -46,14 +46,14 @@ describe('announcement', function () {
         return counter;
       }
     };
-    var foo = new FooEvent();
-    announcement.on(FooEvent, function (message) {
-      message.inc();
+    var userRegCmd = new UserRegistrationCommand();
+    announcement.on(UserRegistrationCommand, function (cmd) {
+      cmd.inc();
     });
-    announcement.emit(foo);
-    announcement.emit(foo);
+    announcement.emit(userRegCmd);
+    announcement.emit(userRegCmd);
     process.nextTick(function () {
-      assert.equal(foo.count(), 2);
+      assert.equal(userRegCmd.count(), 2);
       done();
     });
   });
