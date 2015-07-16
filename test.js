@@ -77,6 +77,13 @@ describe('announcement', function () {
 
     announcement.off(cmdHandler);
     assert(announcement.handlers.size === 0, 'Expected handlers.size to be 1');
+  });
 
+  it('should bind `this` to event listeners', function (done) {
+    announcement.on('user-registered', function (user) {
+      assert.deepEqual(this, announcement);
+      done();
+    });
+    announcement.emit('user-registered', { username: 'doowb' });
   });
 });

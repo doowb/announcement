@@ -130,9 +130,10 @@ Announcement.prototype.emit = function(eventOrCommand) {
   if (typeof eventOrCommand === 'string') {
     var listeners = this.events[eventOrCommand];
     if (listeners) {
+      var self = this;
       async.each(listeners, function (listener, next) {
         process.nextTick(function () {
-          listener.apply(null, args);
+          listener.apply(self, args);
           next();
         });
       });
