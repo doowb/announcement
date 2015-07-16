@@ -24,9 +24,9 @@ var Announcement = require('announcement');
 
 ## API
 
-### [Announcement](index.js#L26)
+### [Announcement](index.js#L27)
 
-Main entry point of Announcement event emitter/aggregator
+Main entry point of Announcement eventOrCommand emitter/aggregator
 
 **Example**
 
@@ -35,48 +35,75 @@ var Announcement = require('announcement');
 var announcement = new Announcment();
 ```
 
-### [.on](index.js#L55)
+### [.on](index.js#L56)
 
-Register a listener for an event.
+Register a listener for an eventOrCommand.
 
 **Params**
 
-* `event` **{String|Function}**: Event type to listen for.
-* `cb` **{Function}**: Callback invoked when `event` type is emitted.
+* `eventOrCommand` **{String|Function}**: Event type to listen for.
+* `cb` **{Function}**: Callback invoked when `eventOrCommand` type is emitted.
 * `returns` **{Function}**: Original callback function or handler function to use to remove listener.
 
 **Example**
 
 ```js
-announcement.on('foo', function (data) {
-  // do something with data
+announcement.on('user-registration', function (user) {
+  // do something with user
 });
 
-var FooEvent = function () {};
-announcement.on(FooEvent, function (data) {
-  // data will be an instance of FooEvent
-  // do something with data
+var UserRegistrationCommand = function () {};
+announcement.on(UserRegistrationCommand, function (userRegCmd) {
+  // userRegCmd will be an instance of UserRegistrationCommand
+  // do something with userRegCmd
 });
 ```
 
-### [.emit](index.js#L83)
+### [.off](index.js#L93)
 
-Asynchronously emit an event and additional data.
+Removes a registered listener or CommandHandler The listener `cb` or the CommandHandler instance need to be the one returned from the `on` method.
 
 **Params**
 
-* `event` **{String|Object}**: Event type to emit.
+* `eventOrCommand` **{String|Function}**: Event string or instance of a CommandHandler to turn off.
+* `cb` **{Function}**: Listener function that will be removed.
+* `returns` **{Boolean}** `true`: if the listener existed before being removed.
+
+**Example**
+
+```js
+// register listener
+var listener = announcement.on('user-registration', function (user) {
+  console.log(user);
+});
+// emit user-registration and see output from listener
+announcement.emit('user-registration', { username: 'doowb' });
+//=> { username: 'doowb' }
+
+// remove listener
+announcement.off('user-registration', listener);
+// emit user-registration and nothing is output
+announcement.emit('user-registration', { username: 'doowb' });
+```
+
+### [.emit](index.js#L128)
+
+Asynchronously emit an eventOrCommand and additional data.
+
+**Params**
+
+* `eventOrCommand` **{String|Object}**: Event string or instance of a Command to emit.
 
 **Example**
 
 ```js
 // emit string event
-announcement.emit('foo', { bar: 'baz' });
+announcement.emit('user-registered', { username: 'doowb' });
 
-// emit typed event
-var foo = new FooEvent();
-foo.bar = 'baz';
-announcement.emit(foo);
+// emit typed Command
+var userRegCmd = new UserRegistrationCommand();
+userRegCmd.user = { username: 'doowb' };
+announcement.emit(userRegCmd);
 ```
 
 ## Contributing
