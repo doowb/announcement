@@ -2,19 +2,19 @@
 
 > Asynchronous event emitter and aggregator.
 
-## Install with [npm](npmjs.org)
+Install with [npm](https://www.npmjs.com/)
 
-```bash
-npm i announcement --save
+```sh
+$ npm i announcement --save
 ```
 
 ## Running tests
-Install dev dependencies.
 
-```bash
-npm i -d && npm test
+Install dev dependencies:
+
+```sh
+$ npm i -d && npm test
 ```
-
 
 ## Usage
 
@@ -23,22 +23,29 @@ var Announcement = require('announcement');
 ```
 
 ## API
-### [Announcement](./index.js#L26)
+
+### [Announcement](index.js#L26)
 
 Main entry point of Announcement event emitter/aggregator
+
+**Example**
 
 ```js
 var Announcement = require('announcement');
 var announcement = new Announcment();
 ```
 
-### [.on](./index.js#L55)
+### [.on](index.js#L55)
 
 Register a listener for an event.
 
-* `event` **{String|Function}**: Event type to listen for.    
-* `cb` **{Function}**: Callback invoked when `event` type is emitted.    
-* `returns` **{Function}**: Original callback function or handler function to use to remove listener.  
+**Params**
+
+* `event` **{String|Function}**: Event type to listen for.
+* `cb` **{Function}**: Callback invoked when `event` type is emitted.
+* `returns` **{Function}**: Original callback function or handler function to use to remove listener.
+
+**Example**
 
 ```js
 announcement.on('foo', function (data) {
@@ -52,11 +59,15 @@ announcement.on(FooEvent, function (data) {
 });
 ```
 
-### [.emit](./index.js#L83)
+### [.emit](index.js#L83)
 
 Asynchronously emit an event and additional data.
 
-* `event` **{String|Object}**: Event type to emit.    
+**Params**
+
+* `event` **{String|Object}**: Event type to emit.
+
+**Example**
 
 ```js
 // emit string event
@@ -68,20 +79,21 @@ foo.bar = 'baz';
 announcement.emit(foo);
 ```
 
-
 ## Contributing
+
 Pull requests and stars are always welcome. For bugs and feature requests, [please create an issue](https://github.com/doowb/announcement/issues)
 
 ## Author
 
 **Brian Woodward**
- 
+
 + [github/doowb](https://github.com/doowb)
-+ [twitter/doowb](http://twitter.com/doowb) 
++ [twitter/doowb](http://twitter.com/doowb)
 
 ## License
+
 Copyright © 2015 Brian Woodward
-Released under the MIT license
+Released under the MIT license.
 
 ***
 
