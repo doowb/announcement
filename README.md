@@ -24,7 +24,7 @@ var Announcement = require('announcement');
 
 ## API
 
-### [Announcement](index.js#L27)
+### [Announcement](index.js#L28)
 
 Main entry point of Announcement eventOrCommand emitter/aggregator
 
@@ -35,13 +35,13 @@ var Announcement = require('announcement');
 var announcement = new Announcment();
 ```
 
-### [.on](index.js#L56)
+### [.on](index.js#L57)
 
 Register a listener for an eventOrCommand.
 
 **Params**
 
-* `eventOrCommand` **{String|Function}**: Event type to listen for.
+* `eventOrCommand` **{String|Function}**: Event string or instance of a Command to listen for.
 * `cb` **{Function}**: Callback invoked when `eventOrCommand` type is emitted.
 * `returns` **{Function}**: Original callback function or handler function to use to remove listener.
 
@@ -59,7 +59,7 @@ announcement.on(UserRegistrationCommand, function (userRegCmd) {
 });
 ```
 
-### [.off](index.js#L93)
+### [.off](index.js#L94)
 
 Removes a registered listener or CommandHandler The listener `cb` or the CommandHandler instance need to be the one returned from the `on` method.
 
@@ -86,7 +86,31 @@ announcement.off('user-registration', listener);
 announcement.emit('user-registration', { username: 'doowb' });
 ```
 
-### [.emit](index.js#L128)
+### [.once](index.js#L133)
+
+Register a listener for an event or a command that will only execute once.
+
+**Params**
+
+* `eventOrCommand` **{String|Function}**: Event string or instance of a Command to listen for.
+* `cb` **{Function}**: Callback invoked when `eventOrCommand` type is emitted.
+* `returns` **{Function}**: Original callback function or handler function to use to remove listener.
+
+**Example**
+
+```js
+announcement.once('user-registration', function (user) {
+  // do something with user
+});
+
+var UserRegistrationCommand = function () {};
+announcement.once(UserRegistrationCommand, function (userRegCmd) {
+  // userRegCmd will be an instance of UserRegistrationCommand
+  // do something with userRegCmd
+});
+```
+
+### [.emit](index.js#L166)
 
 Asynchronously emit an eventOrCommand and additional data.
 
